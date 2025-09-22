@@ -31,7 +31,7 @@ public class ClientRepositoryImpl implements ClientRepository {
             transaction.begin();
             entityManager.persist(client);
             transaction.commit();
-            System.out.println("✅ Клиент добавлен: " + client);
+            System.out.println("Клиент добавлен: " + client);
         } catch (Exception e) {
             System.err.println("Ошибка при добавлении клиента: " + e.getMessage());
         }
