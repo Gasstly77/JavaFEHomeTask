@@ -9,7 +9,8 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "clients", schema = "hometask")
-@Data
+@Getter
+@Setter
 @ToString
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
@@ -18,7 +19,12 @@ import java.time.LocalDate;
 public class ClientEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_entity_seq_gen")
+    @SequenceGenerator(
+            name = "client_entity_seq_gen",
+            sequenceName = "hometask.client_entity_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     @Column(name = "first_name", nullable = false)
@@ -42,4 +48,10 @@ public class ClientEntity {
 
     @Column(name = "total_spent", nullable = false)
     private Double totalSpent;
+
+    @Embedded
+    private Address address;
+
+    @Column(name = "premium")
+    private boolean premium;
 }

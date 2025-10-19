@@ -3,11 +3,13 @@ package by.javafe.hometask.entity;
 import by.javafe.hometask.constant.RoomStatus;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "rooms", schema = "hometask")
-@Data
+@Getter
+@Setter
 @ToString
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
@@ -16,7 +18,12 @@ import java.math.BigDecimal;
 public class RoomEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_entity_seq_gen")
+    @SequenceGenerator(
+            name = "room_entity_seq_gen",
+            sequenceName = "hometask.room_entity_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     @Column(name = "name", nullable = false)

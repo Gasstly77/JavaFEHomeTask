@@ -1,23 +1,24 @@
 package by.javafe.hometask.repository;
 
-import by.javafe.hometask.config.HibernateUtil;
+import by.javafe.hometask.config.HibernateConfig;
 import by.javafe.hometask.entity.RoomEntity;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 public class RoomRepositoryImpl implements RoomRepository{
     @Override
     public RoomEntity findById(Long id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             return session.get(RoomEntity.class, id);
         }
     }
     @Override
     public void save(RoomEntity room) {
         Transaction transaction;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
             session.persist(room);
             transaction.commit();
@@ -28,7 +29,7 @@ public class RoomRepositoryImpl implements RoomRepository{
     @Override
     public void addCopyWithNewIdentifier(Long sourceRoomId, String newIdentifier) {
         Transaction transaction;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
 
             RoomEntity sourceRoom = session.get(RoomEntity.class, sourceRoomId);
@@ -38,17 +39,13 @@ public class RoomRepositoryImpl implements RoomRepository{
 
             session.detach(sourceRoom);
 
-            RoomEntity newRoom = new RoomEntity();
-            newRoom.setName(sourceRoom.getName());
-            newRoom.setIdentifier(newIdentifier);
-            newRoom.setMaxCapacity(sourceRoom.getMaxCapacity());
-            newRoom.setStatus(sourceRoom.getStatus());
-            newRoom.setHourlyRate(sourceRoom.getHourlyRate());
+            sourceRoom.setId(null);
+            sourceRoom.setIdentifier(newIdentifier);
 
-            session.persist(newRoom);
+            session.persist(sourceRoom);
             transaction.commit();
 
-            System.out.println("✅ Создана копия помещения: " + newRoom);
+            System.out.println("✅ Создана копия помещения: " + sourceRoom);
 
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при копировании помещения", e);
@@ -57,7 +54,7 @@ public class RoomRepositoryImpl implements RoomRepository{
     @Override
     public void updateHourlyRate(Long roomId, BigDecimal newRate) {
         Transaction transaction;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
 
             RoomEntity room = session.get(RoomEntity.class, roomId);
@@ -76,7 +73,7 @@ public class RoomRepositoryImpl implements RoomRepository{
     }
     @Override
     public List<RoomEntity> findAll() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
             return session.createQuery("FROM RoomEntity", RoomEntity.class).list();
         }
     }
