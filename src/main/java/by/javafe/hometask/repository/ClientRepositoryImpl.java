@@ -2,6 +2,7 @@ package by.javafe.hometask.repository;
 
 import by.javafe.hometask.constant.ClientStatus;
 import by.javafe.hometask.entity.ClientEntity;
+import by.javafe.hometask.entity.VisitorEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -43,10 +44,10 @@ public class ClientRepositoryImpl implements ClientRepository {
         try (entityManager) {
             EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
-            ClientEntity client = entityManager.find(ClientEntity.class, id);
-            if (client != null) {
-                client.setStatus(newStatus);
-                entityManager.merge(client);
+            VisitorEntity visitor = entityManager.find(VisitorEntity.class, id);
+            if (visitor != null) {
+                visitor.setStatus(newStatus);
+                entityManager.merge(visitor);
                 System.out.println("Статус клиента с ID " + id + " изменён на " + newStatus);
             } else {
                 System.out.println("Клиент с ID " + id + " не найден.");

@@ -1,21 +1,19 @@
 package by.javafe.hometask.entity;
 
-import by.javafe.hometask.constant.ClientStatus;
 import jakarta.persistence.*;
 import lombok.*;
-
-
-import java.time.LocalDate;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "clients", schema = "hometask")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class ClientEntity {
 
     @Id
@@ -33,25 +31,9 @@ public class ClientEntity {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "age")
-    private Integer age;
-
-    @Column(name = "phone_number", nullable = false, unique = true)
-    private String phoneNumber;
-
-    @Column(name = "last_visit_date")
-    private LocalDate lastVisitDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private ClientStatus status;
-
-    @Column(name = "total_spent", nullable = false)
-    private Double totalSpent;
+    @Column(name = "year_of_birth")
+    private Integer yearOfBirth;
 
     @Embedded
     private Address address;
-
-    @Column(name = "premium")
-    private boolean premium;
 }
