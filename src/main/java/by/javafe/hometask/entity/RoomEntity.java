@@ -5,12 +5,14 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "rooms", schema = "hometask")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"service", "bookings"})
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,4 +43,12 @@ public class RoomEntity {
 
     @Column(name = "hourly_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal hourlyRate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id", nullable = true)
+    private ServiceEntity service;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<BookingEntity> bookings = new ArrayList<>();
 }

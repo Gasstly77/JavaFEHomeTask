@@ -6,10 +6,17 @@ import by.javafe.hometask.service.RoomService;
 import by.javafe.hometask.service.ServiceService;
 import by.javafe.hometask.service.VisitorService;
 import by.javafe.hometask.service.EmployeeService;
+import by.javafe.hometask.service.VisitService;
+import by.javafe.hometask.service.BookingService;
 import by.javafe.hometask.constant.ClientStatus;
+import by.javafe.hometask.config.HibernateConfig;
+
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public class Main {
@@ -98,8 +105,190 @@ public class Main {
             System.out.println(employee);
         }
 
+        // 1. Связываем услуги с помещениями
+        System.out.println("\n=== Связываем услуги с помещениями ===");
+        linkServicesToRooms(serviceService, roomService);
+
+        // 2. Создаем посещения для посетителей
+        System.out.println("\n=== Создаем посещения ===");
+        VisitService visitService = new VisitService();
+        createVisits(visitorService, visitService);
+
+        // 3. Создаем записи
+        System.out.println("\n=== Создаем записи ===");
+        BookingService bookingService = new BookingService();
+        createBookings(visitorService, roomService, bookingService);
+
+        // 4. Демонстрируем каскадное удаление
+        System.out.println("\n=== Демонстрация каскадного удаления ===");
+        demonstrateCascadeDeletion(roomService, bookingService);
+
         visitorService.close();
         employeeService.close();
+    }
+
+    private static void linkServicesToRooms(ServiceService serviceService, RoomService roomService) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            List<ServiceEntity> services = serviceService.findAllServices();
+            List<RoomEntity> rooms = roomService.findAll();
+
+            // Связываем первую услугу (Теннис) с первыми двумя помещениями
+            if (!services.isEmpty() && rooms.size() >= 2) {
+                ServiceEntity tennisService = services.get(0); // Теннис
+                RoomEntity room1 = session.get(RoomEntity.class, rooms.get(0).getId());
+                RoomEntity room2 = session.get(RoomEntity.class, rooms.get(1).getId());
+
+                if (room1 != null && tennisService != null) {
+                    room1.setService(tennisService);
+                    session.merge(room1);
+                    System.out.println("✅ Помещение '" + room1.getName() + "' связано с услугой '" + tennisService.getName() + "'");
+                }
+
+                if (room2 != null && services.size() > 1) {
+                    ServiceEntity swimmingService = services.get(1); // Плавание
+                    room2.setService(swimmingService);
+                    session.merge(room2);
+                    System.out.println("✅ Помещение '" + room2.getName() + "' связано с услугой '" + swimmingService.getName() + "'");
+                }
+            }
+
+            transaction.commit();
+        }
+    }
+
+    private static void createVisits(VisitorService visitorService, VisitService visitService) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            List<VisitorEntity> visitors = visitorService.getAllVisitors();
+
+            if (!visitors.isEmpty()) {
+                // Создаем посещения для первого посетителя
+                VisitorEntity visitor1 = session.get(VisitorEntity.class, visitors.get(0).getId());
+                if (visitor1 != null) {
+                    VisitEntity visit1 = VisitEntity.builder()
+                            .visitDate(LocalDate.of(2025, 1, 15))
+                            .amountSpent(BigDecimal.valueOf(1500))
+                            .visitor(visitor1)
+                            .build();
+                    session.persist(visit1);
+                    System.out.println("✅ Создано посещение: " + visit1.getVisitDate() + ", сумма: " + visit1.getAmountSpent());
+
+                    VisitEntity visit2 = VisitEntity.builder()
+                            .visitDate(LocalDate.of(2025, 1, 20))
+                            .amountSpent(BigDecimal.valueOf(2000))
+                            .visitor(visitor1)
+                            .build();
+                    session.persist(visit2);
+                    System.out.println("✅ Создано посещение: " + visit2.getVisitDate() + ", сумма: " + visit2.getAmountSpent());
+                }
+
+                // Создаем посещение для второго посетителя
+                if (visitors.size() > 1) {
+                    VisitorEntity visitor2 = session.get(VisitorEntity.class, visitors.get(1).getId());
+                    if (visitor2 != null) {
+                        VisitEntity visit3 = VisitEntity.builder()
+                                .visitDate(LocalDate.of(2025, 1, 18))
+                                .amountSpent(BigDecimal.valueOf(3000))
+                                .visitor(visitor2)
+                                .build();
+                        session.persist(visit3);
+                        System.out.println("✅ Создано посещение: " + visit3.getVisitDate() + ", сумма: " + visit3.getAmountSpent());
+                    }
+                }
+            }
+
+            transaction.commit();
+        }
+    }
+
+    private static void createBookings(VisitorService visitorService, RoomService roomService, BookingService bookingService) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            List<VisitorEntity> visitors = visitorService.getAllVisitors();
+            List<RoomEntity> rooms = roomService.findAll();
+
+            if (!visitors.isEmpty() && !rooms.isEmpty()) {
+                VisitorEntity visitor1 = session.get(VisitorEntity.class, visitors.get(0).getId());
+                RoomEntity room1 = session.get(RoomEntity.class, rooms.get(0).getId());
+
+                if (visitor1 != null && room1 != null) {
+                    BookingEntity booking1 = BookingEntity.builder()
+                            .visitor(visitor1)
+                            .room(room1)
+                            .bookingDate(LocalDate.of(2025, 2, 1))
+                            .bookingTime(LocalTime.of(10, 0))
+                            .build();
+                    session.persist(booking1);
+                    System.out.println("✅ Создана запись: " + booking1.getBookingDate() + " " + booking1.getBookingTime() +
+                            " для помещения '" + room1.getName() + "'");
+
+                    BookingEntity booking2 = BookingEntity.builder()
+                            .visitor(visitor1)
+                            .room(room1)
+                            .bookingDate(LocalDate.of(2025, 2, 5))
+                            .bookingTime(LocalTime.of(14, 30))
+                            .build();
+                    session.persist(booking2);
+                    System.out.println("✅ Создана запись: " + booking2.getBookingDate() + " " + booking2.getBookingTime() +
+                            " для помещения '" + room1.getName() + "'");
+                }
+
+                // Создаем запись для другого посетителя и другого помещения
+                if (visitors.size() > 1 && rooms.size() > 1) {
+                    VisitorEntity visitor2 = session.get(VisitorEntity.class, visitors.get(1).getId());
+                    RoomEntity room2 = session.get(RoomEntity.class, rooms.get(1).getId());
+
+                    if (visitor2 != null && room2 != null) {
+                        BookingEntity booking3 = BookingEntity.builder()
+                                .visitor(visitor2)
+                                .room(room2)
+                                .bookingDate(LocalDate.of(2025, 2, 3))
+                                .bookingTime(LocalTime.of(16, 0))
+                                .build();
+                        session.persist(booking3);
+                        System.out.println("✅ Создана запись: " + booking3.getBookingDate() + " " + booking3.getBookingTime() +
+                                " для помещения '" + room2.getName() + "'");
+                    }
+                }
+            }
+
+            transaction.commit();
+        }
+    }
+
+    private static void demonstrateCascadeDeletion(RoomService roomService, BookingService bookingService) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
+            // Показываем записи до удаления
+            List<BookingEntity> bookingsBefore = bookingService.findAll();
+            System.out.println("📋 Записей до удаления помещения: " + bookingsBefore.size());
+            bookingsBefore.forEach(b -> System.out.println("  - Запись ID: " + b.getId() +
+                    ", помещение: " + (b.getRoom() != null ? b.getRoom().getName() : "N/A") +
+                    ", дата: " + b.getBookingDate()));
+
+            // Находим первое помещение
+            List<RoomEntity> rooms = roomService.findAll();
+            if (!rooms.isEmpty()) {
+                RoomEntity roomToDelete = rooms.get(0);
+                Long roomId = roomToDelete.getId();
+
+                System.out.println("\n🗑️ Удаляем помещение ID: " + roomId + " (" + roomToDelete.getName() + ")");
+
+                // Удаляем помещение (должны каскадно удалиться все записи)
+                roomService.delete(roomId);
+
+                // Показываем записи после удаления
+                List<BookingEntity> bookingsAfter = bookingService.findAll();
+                System.out.println("\n📋 Записей после удаления помещения: " + bookingsAfter.size());
+
+                // Подсчитываем, сколько записей было удалено
+                long deletedCount = bookingsBefore.size() - bookingsAfter.size();
+                System.out.println("✅ Каскадно удалено записей: " + deletedCount);
+            }
+        }
     }
 
     private static VisitorEntity buildVisitor(String firstName, String lastName, Integer yearOfBirth,

@@ -5,13 +5,15 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "visitors", schema = "hometask")
 @Getter
 @Setter
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"visits", "bookings"})
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,5 +32,13 @@ public class VisitorEntity extends ClientEntity {
 
     @Column(name = "first_visit_date")
     private LocalDate firstVisitDate;
+
+    @OneToMany(mappedBy = "visitor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<VisitEntity> visits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "visitor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<BookingEntity> bookings = new ArrayList<>();
 }
 

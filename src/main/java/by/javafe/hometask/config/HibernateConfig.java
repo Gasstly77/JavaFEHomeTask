@@ -1,8 +1,10 @@
 package by.javafe.hometask.config;
 
+import by.javafe.hometask.entity.BookingEntity;
 import by.javafe.hometask.entity.ClientEntity;
 import by.javafe.hometask.entity.RoomEntity;
 import by.javafe.hometask.entity.ServiceEntity;
+import by.javafe.hometask.entity.VisitEntity;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -29,6 +31,8 @@ public class HibernateConfig {
             configuration.addAnnotatedClass(ClientEntity.class);
             configuration.addAnnotatedClass(ServiceEntity.class);
             configuration.addAnnotatedClass(RoomEntity.class);
+            configuration.addAnnotatedClass(VisitEntity.class);
+            configuration.addAnnotatedClass(BookingEntity.class);
 
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
