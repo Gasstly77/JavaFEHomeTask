@@ -38,6 +38,10 @@ public class EmployeeService {
         return employeeRepository.calculateTotalSalaryExpenses(startDate, endDate);
     }
 
+    public List<EmployeeEntity> getAllUsingCriteria() {
+        return employeeRepository.getAllUsingCriteria();
+    }
+
     public void close() {
         employeeRepository.close();
     }

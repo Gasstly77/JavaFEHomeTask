@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -132,6 +135,17 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
             }
 
             return totalExpenses;
+        }
+    }
+
+    @Override
+    public List<EmployeeEntity> getAllUsingCriteria() {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<EmployeeEntity> query = cb.createQuery(EmployeeEntity.class);
+            Root<EmployeeEntity> root = query.from(EmployeeEntity.class);
+            query.select(root);
+            return entityManager.createQuery(query).getResultList();
         }
     }
 

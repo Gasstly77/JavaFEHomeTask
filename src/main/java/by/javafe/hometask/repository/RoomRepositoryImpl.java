@@ -2,6 +2,15 @@ package by.javafe.hometask.repository;
 
 import by.javafe.hometask.config.HibernateConfig;
 import by.javafe.hometask.entity.RoomEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -117,15 +126,70 @@ public class RoomRepositoryImpl implements RoomRepository{
             }
 
             // Рассчитываем стоимость за час на 1 человека
-            // Используем простое деление через double для избежания deprecated методов
             double hourlyRate = room.getHourlyRate().doubleValue();
             double capacity = room.getMaxCapacity().doubleValue();
             double pricePerPerson = hourlyRate / capacity;
             
             // Округляем до 2 знаков после запятой
-            // Умножаем на 100, округляем, затем делим на 100
             double rounded = Math.round(pricePerPerson * 100.0) / 100.0;
             return BigDecimal.valueOf(rounded);
+        }
+    }
+
+    @Override
+    public Integer getTotalCapacityUsingCriteria() {
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("sportsPU");
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Integer> query = cb.createQuery(Integer.class);
+            Root<RoomEntity> root = query.from(RoomEntity.class);
+            
+            // Используем sum для подсчета общей вместимости
+            query.select(cb.sum(root.<Integer>get("maxCapacity")));
+            
+            Integer result = entityManager.createQuery(query).getSingleResult();
+            return result != null ? result : 0;
+        } finally {
+            if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+                entityManagerFactory.close();
+            }
+        }
+    }
+
+    @Override
+    public List<RoomEntity> findRoomsVisitedByGuestsOver50UsingCriteria() {
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("sportsPU");
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<RoomEntity> query = cb.createQuery(RoomEntity.class);
+            
+            // Начинаем с BookingEntity для доступа к visitor и room
+            Root<by.javafe.hometask.entity.BookingEntity> bookingRoot = query.from(by.javafe.hometask.entity.BookingEntity.class);
+            
+            // Join с VisitorEntity
+            Join<by.javafe.hometask.entity.BookingEntity, by.javafe.hometask.entity.VisitorEntity> visitorJoin = 
+                    bookingRoot.join("visitor", JoinType.INNER);
+            
+            // Join с RoomEntity
+            Join<by.javafe.hometask.entity.BookingEntity, RoomEntity> roomJoin = 
+                    bookingRoot.join("room", JoinType.INNER);
+            
+            // Вычисляем год рождения для возраста 50 лет
+            int currentYear = java.time.LocalDate.now().getYear();
+            int maxYearOfBirth = currentYear - 50; // Гости старше 50 лет родились до этого года
+            
+            // Создаем предикат: yearOfBirth < (currentYear - 50)
+            // VisitorEntity наследуется от ClientEntity, поэтому используем visitorJoin
+            Predicate agePredicate = cb.lessThan(visitorJoin.get("yearOfBirth"), maxYearOfBirth);
+            
+            // Выбираем уникальные помещения
+            query.select(roomJoin).where(agePredicate).distinct(true);
+            
+            return entityManager.createQuery(query).getResultList();
+        } finally {
+            if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+                entityManagerFactory.close();
+            }
         }
     }
 }

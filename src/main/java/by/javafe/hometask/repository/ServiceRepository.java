@@ -8,4 +8,6 @@ public interface ServiceRepository {
     void saveService(ServiceEntity service);
 
     List<ServiceEntity> findAllServices();
+
+    ServiceEntity findCheapestServiceUsingCriteria();
 }

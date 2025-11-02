@@ -15,4 +15,6 @@ public interface ClientRepository {
     void delete(Long id);
 
     List<ClientEntity> findByName(String name);
+
+    List<ClientEntity> findByAgeRangeUsingCriteria(int minAge, int maxAge);
 }

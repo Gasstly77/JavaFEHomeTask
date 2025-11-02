@@ -18,5 +18,7 @@ public interface EmployeeRepository {
     EmployeeEntity findLowestPaidEmployee();
 
     BigDecimal calculateTotalSalaryExpenses(LocalDate startDate, LocalDate endDate);
+
+    List<EmployeeEntity> getAllUsingCriteria();
 }
 
