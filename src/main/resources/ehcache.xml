@@ -16,9 +16,6 @@
         <expiry>
             <ttl unit="hours">1</ttl>
         </expiry>
-        <resources>
-            <disk>1000</disk>
-        </resources>
     </cache>
 
     <cache alias="default-update-timestamps-region">
