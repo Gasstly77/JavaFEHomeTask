@@ -33,6 +33,16 @@ public class ClientService {
         clientRepository.updateStatus(id, newStatus);
     }
 
+    // Найти клиента по имени
+    public List<ClientEntity> findClientByName(String name) {
+        return clientRepository.findByName(name);
+    }
+
+    // Найти клиентов по диапазону возраста через Criteria
+    public List<ClientEntity> findClientsByAgeRangeUsingCriteria(int minAge, int maxAge) {
+        return clientRepository.findByAgeRangeUsingCriteria(minAge, maxAge);
+    }
+
     public void close() {
         clientRepository.close();
     }

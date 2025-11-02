@@ -13,4 +13,8 @@ public interface ClientRepository {
     void updateStatus(Long id, ClientStatus newStatus);
 
     void delete(Long id);
+
+    List<ClientEntity> findByName(String name);
+
+    List<ClientEntity> findByAgeRangeUsingCriteria(int minAge, int maxAge);
 }

@@ -19,4 +19,8 @@ public class ServiceService {
     public List<ServiceEntity> findAllServices() {
         return serviceRepository.findAllServices();
     }
+
+    public ServiceEntity findCheapestServiceUsingCriteria() {
+        return serviceRepository.findCheapestServiceUsingCriteria();
+    }
 }

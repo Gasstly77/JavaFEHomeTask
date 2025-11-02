@@ -7,7 +7,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class ClientRepositoryImpl implements ClientRepository {
@@ -74,6 +79,42 @@ public class ClientRepositoryImpl implements ClientRepository {
             transaction.commit();
         } catch (Exception e) {
             System.err.println("Ошибка при удалении клиента: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ClientEntity> findByName(String name) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.createQuery(
+                    "SELECT c FROM ClientEntity c WHERE LOWER(c.firstName) LIKE LOWER(:name) OR LOWER(c.lastName) LIKE LOWER(:name)",
+                    ClientEntity.class)
+                    .setParameter("name", "%" + name + "%")
+                    .getResultList();
+        }
+    }
+
+    @Override
+    public List<ClientEntity> findByAgeRangeUsingCriteria(int minAge, int maxAge) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<ClientEntity> query = cb.createQuery(ClientEntity.class);
+            Root<ClientEntity> root = query.from(ClientEntity.class);
+            
+            // Вычисляем год рождения для минимального и максимального возраста
+            int currentYear = LocalDate.now().getYear();
+            int minYearOfBirth = currentYear - maxAge; // Меньше возраст = больше год рождения
+            int maxYearOfBirth = currentYear - minAge; // Больше возраст = меньше год рождения
+            
+            // Создаем предикаты для диапазона возраста
+            Predicate minAgePredicate = cb.greaterThanOrEqualTo(root.get("yearOfBirth"), minYearOfBirth);
+            Predicate maxAgePredicate = cb.lessThanOrEqualTo(root.get("yearOfBirth"), maxYearOfBirth);
+            
+            // Объединяем условия
+            Predicate ageRangePredicate = cb.and(minAgePredicate, maxAgePredicate);
+            
+            query.select(root).where(ageRangePredicate);
+            
+            return entityManager.createQuery(query).getResultList();
         }
     }
 

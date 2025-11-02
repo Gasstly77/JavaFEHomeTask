@@ -17,4 +17,10 @@ public interface RoomRepository {
     List<RoomEntity> findAll();
 
     void delete(Long id);
+
+    BigDecimal calculatePricePerPersonPerHour(String roomName);
+
+    Integer getTotalCapacityUsingCriteria();
+
+    List<RoomEntity> findRoomsVisitedByGuestsOver50UsingCriteria();
 }

@@ -36,4 +36,16 @@ public class RoomService {
     public void delete(Long id) {
         roomRepository.delete(id);
     }
+
+    public BigDecimal calculatePricePerPersonPerHour(String roomName) {
+        return roomRepository.calculatePricePerPersonPerHour(roomName);
+    }
+
+    public Integer getTotalCapacityUsingCriteria() {
+        return roomRepository.getTotalCapacityUsingCriteria();
+    }
+
+    public List<RoomEntity> findRoomsVisitedByGuestsOver50UsingCriteria() {
+        return roomRepository.findRoomsVisitedByGuestsOver50UsingCriteria();
+    }
 }

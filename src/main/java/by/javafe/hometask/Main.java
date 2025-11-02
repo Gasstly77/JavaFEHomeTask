@@ -8,6 +8,7 @@ import by.javafe.hometask.service.VisitorService;
 import by.javafe.hometask.service.EmployeeService;
 import by.javafe.hometask.service.VisitService;
 import by.javafe.hometask.service.BookingService;
+import by.javafe.hometask.service.ClientService;
 import by.javafe.hometask.constant.ClientStatus;
 import by.javafe.hometask.config.HibernateConfig;
 
@@ -122,6 +123,10 @@ public class Main {
         // 4. Демонстрируем каскадное удаление
         System.out.println("\n=== Демонстрация каскадного удаления ===");
         demonstrateCascadeDeletion(roomService, bookingService);
+
+        // 5. Демонстрируем новые методы поиска и расчета
+        System.out.println("\n=== Демонстрация новых методов ===");
+        demonstrateNewMethods(serviceService, visitorService, employeeService, roomService);
 
         visitorService.close();
         employeeService.close();
@@ -289,6 +294,61 @@ public class Main {
                 System.out.println("✅ Каскадно удалено записей: " + deletedCount);
             }
         }
+    }
+
+    private static void demonstrateNewMethods(ServiceService serviceService, VisitorService visitorService,
+                                             EmployeeService employeeService, RoomService roomService) {
+        // 1. Поиск клиента по имени
+        System.out.println("\n--- 1. Поиск клиента по имени ---");
+        ClientService clientService = new ClientService();
+        List<ClientEntity> clientsByName = clientService.findClientByName("Анна");
+        if (!clientsByName.isEmpty()) {
+            System.out.println("Найдено клиентов: " + clientsByName.size());
+            clientsByName.forEach(c -> System.out.println("  - " + c.getFirstName() + " " + c.getLastName()));
+        } else {
+            System.out.println("Клиенты с именем 'Анна' не найдены.");
+        }
+
+        // 2. Самый высокооплачиваемый сотрудник
+        System.out.println("\n--- 2. Самый высокооплачиваемый сотрудник ---");
+        EmployeeEntity highestPaid = employeeService.findHighestPaidEmployee();
+        if (highestPaid != null) {
+            System.out.println("ФИО: " + highestPaid.getFirstName() + " " + highestPaid.getLastName());
+            System.out.println("Должность: " + highestPaid.getPosition());
+            System.out.println("Зарплата: " + highestPaid.getMonthlySalary() + " руб./мес");
+        } else {
+            System.out.println("Сотрудники не найдены.");
+        }
+
+        // 3. Сотрудник с самой низкой зарплатой
+        System.out.println("\n--- 3. Сотрудник с самой низкой зарплатой ---");
+        EmployeeEntity lowestPaid = employeeService.findLowestPaidEmployee();
+        if (lowestPaid != null) {
+            System.out.println("ФИО: " + lowestPaid.getFirstName() + " " + lowestPaid.getLastName());
+            System.out.println("Должность: " + lowestPaid.getPosition());
+            System.out.println("Зарплата: " + lowestPaid.getMonthlySalary() + " руб./мес");
+        } else {
+            System.out.println("Сотрудники не найдены.");
+        }
+
+        // 4. Подсчет расходов на персонал за период
+        System.out.println("\n--- 4. Расходы на персонал за период ---");
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+        BigDecimal totalExpenses = employeeService.calculateTotalSalaryExpenses(startDate, endDate);
+        System.out.println("Период: " + startDate + " - " + endDate);
+        System.out.println("Общие расходы на персонал: " + totalExpenses + " руб.");
+
+        // 5. Расчет стоимости за час на 1 человека для тренажёрных залов
+        System.out.println("\n--- 5. Стоимость за час на 1 человека (тренажёрные залы) ---");
+        try {
+            BigDecimal pricePerPerson = roomService.calculatePricePerPersonPerHour("тренажёрный");
+            System.out.println("Стоимость за час на 1 человека: " + pricePerPerson + " руб.");
+        } catch (RuntimeException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        clientService.close();
     }
 
     private static VisitorEntity buildVisitor(String firstName, String lastName, Integer yearOfBirth,
