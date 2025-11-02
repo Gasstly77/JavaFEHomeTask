@@ -8,6 +8,8 @@
         <class>by.javafe.hometask.entity.ClientEntity</class>
         <class>by.javafe.hometask.entity.SmallRoomView</class>
         <class>by.javafe.hometask.entity.PremiumClientEntity</class>
+        <class>by.javafe.hometask.entity.VisitorEntity</class>
+        <class>by.javafe.hometask.entity.EmployeeEntity</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>
@@ -16,7 +18,7 @@
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
 
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
         </properties>
