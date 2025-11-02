@@ -28,11 +28,13 @@ public class HibernateConfig {
             configuration.setProperty("hibernate.show_sql", "true");
             configuration.setProperty("hibernate.format_sql", "true");
             
-            // Настройка кэша 2-го уровня
+            // Настройка кэша 2-го уровня через Ehcache
             configuration.setProperty("hibernate.cache.use_second_level_cache", "true");
             configuration.setProperty("hibernate.cache.use_query_cache", "true");
             configuration.setProperty("hibernate.cache.region.factory_class", 
-                    "org.hibernate.cache.internal.SimpleCacheRegionFactory");
+                    "org.hibernate.cache.jcache.JCacheRegionFactory");
+            configuration.setProperty("hibernate.javax.cache.provider", 
+                    "org.ehcache.jsr107.EhcacheCachingProvider");
 
             configuration.addAnnotatedClass(ClientEntity.class);
             configuration.addAnnotatedClass(ServiceEntity.class);
