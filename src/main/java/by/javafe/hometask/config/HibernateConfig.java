@@ -27,6 +27,12 @@ public class HibernateConfig {
             configuration.setProperty("hibernate.hbm2ddl.auto", "update");
             configuration.setProperty("hibernate.show_sql", "true");
             configuration.setProperty("hibernate.format_sql", "true");
+            
+            // Настройка кэша 2-го уровня
+            configuration.setProperty("hibernate.cache.use_second_level_cache", "true");
+            configuration.setProperty("hibernate.cache.use_query_cache", "true");
+            configuration.setProperty("hibernate.cache.region.factory_class", 
+                    "org.hibernate.cache.internal.SimpleCacheRegionFactory");
 
             configuration.addAnnotatedClass(ClientEntity.class);
             configuration.addAnnotatedClass(ServiceEntity.class);
