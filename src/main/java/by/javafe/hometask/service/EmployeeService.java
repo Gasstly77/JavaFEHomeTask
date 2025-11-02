@@ -3,6 +3,8 @@ package by.javafe.hometask.service;
 import by.javafe.hometask.entity.EmployeeEntity;
 import by.javafe.hometask.repository.EmployeeRepositoryImpl;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeeService {
@@ -22,6 +24,18 @@ public class EmployeeService {
 
     public void deleteEmployee(Long id) {
         employeeRepository.delete(id);
+    }
+
+    public EmployeeEntity findHighestPaidEmployee() {
+        return employeeRepository.findHighestPaidEmployee();
+    }
+
+    public EmployeeEntity findLowestPaidEmployee() {
+        return employeeRepository.findLowestPaidEmployee();
+    }
+
+    public BigDecimal calculateTotalSalaryExpenses(LocalDate startDate, LocalDate endDate) {
+        return employeeRepository.calculateTotalSalaryExpenses(startDate, endDate);
     }
 
     public void close() {

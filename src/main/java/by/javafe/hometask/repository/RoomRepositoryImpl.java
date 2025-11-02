@@ -95,4 +95,37 @@ public class RoomRepositoryImpl implements RoomRepository{
             throw new RuntimeException("Ошибка при удалении помещения", e);
         }
     }
+
+    @Override
+    public BigDecimal calculatePricePerPersonPerHour(String roomName) {
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
+            List<RoomEntity> rooms = session.createQuery(
+                    "FROM RoomEntity r WHERE LOWER(r.name) LIKE LOWER(:name)",
+                    RoomEntity.class)
+                    .setParameter("name", "%" + roomName + "%")
+                    .list();
+
+            if (rooms.isEmpty()) {
+                throw new RuntimeException("Тренажёрный зал с названием, содержащим '" + roomName + "', не найден.");
+            }
+
+            // Берем первое найденное помещение
+            RoomEntity room = rooms.get(0);
+
+            if (room.getMaxCapacity() == null || room.getMaxCapacity() <= 0) {
+                throw new RuntimeException("Некорректная максимальная вместимость для помещения: " + room.getName());
+            }
+
+            // Рассчитываем стоимость за час на 1 человека
+            // Используем простое деление через double для избежания deprecated методов
+            double hourlyRate = room.getHourlyRate().doubleValue();
+            double capacity = room.getMaxCapacity().doubleValue();
+            double pricePerPerson = hourlyRate / capacity;
+            
+            // Округляем до 2 знаков после запятой
+            // Умножаем на 100, округляем, затем делим на 100
+            double rounded = Math.round(pricePerPerson * 100.0) / 100.0;
+            return BigDecimal.valueOf(rounded);
+        }
+    }
 }

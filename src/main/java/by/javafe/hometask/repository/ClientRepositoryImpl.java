@@ -77,6 +77,17 @@ public class ClientRepositoryImpl implements ClientRepository {
         }
     }
 
+    @Override
+    public List<ClientEntity> findByName(String name) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.createQuery(
+                    "SELECT c FROM ClientEntity c WHERE LOWER(c.firstName) LIKE LOWER(:name) OR LOWER(c.lastName) LIKE LOWER(:name)",
+                    ClientEntity.class)
+                    .setParameter("name", "%" + name + "%")
+                    .getResultList();
+        }
+    }
+
     public void close() {
         if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
             entityManagerFactory.close();
