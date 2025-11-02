@@ -3,11 +3,14 @@ package by.javafe.hometask.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "services", schema = "hometask")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "rooms")
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,4 +31,8 @@ public class ServiceEntity {
 
     @Column(name = "price", nullable = false)
     private Double price;
+
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<RoomEntity> rooms = new ArrayList<>();
 }

@@ -77,4 +77,22 @@ public class RoomRepositoryImpl implements RoomRepository{
             return session.createQuery("FROM RoomEntity", RoomEntity.class).list();
         }
     }
+
+    @Override
+    public void delete(Long id) {
+        Transaction transaction;
+        try (Session session = HibernateConfig.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            RoomEntity room = session.get(RoomEntity.class, id);
+            if (room != null) {
+                session.remove(room);
+                System.out.println("✅ Помещение с ID " + id + " удалено.");
+            } else {
+                System.out.println("⚠️ Помещение с ID " + id + " не найдено.");
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при удалении помещения", e);
+        }
+    }
 }

@@ -15,4 +15,6 @@ public interface RoomRepository {
     void updateHourlyRate(Long roomId, BigDecimal newRate);
 
     List<RoomEntity> findAll();
+
+    void delete(Long id);
 }

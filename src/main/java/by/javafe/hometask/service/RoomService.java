@@ -32,4 +32,8 @@ public class RoomService {
     public List<RoomEntity> findAll() {
         return roomRepository.findAll();
     }
+
+    public void delete(Long id) {
+        roomRepository.delete(id);
+    }
 }
