@@ -27,6 +27,17 @@ public class HibernateConfig {
             configuration.setProperty("hibernate.hbm2ddl.auto", "update");
             configuration.setProperty("hibernate.show_sql", "true");
             configuration.setProperty("hibernate.format_sql", "true");
+            
+            // Настройка кэша 2-го уровня через Ehcache (конфигурация в ehcache.xml)
+            configuration.setProperty("hibernate.cache.use_second_level_cache", "true");
+            configuration.setProperty("hibernate.cache.use_query_cache", "true");
+            configuration.setProperty("hibernate.cache.region.factory_class", 
+                    "org.hibernate.cache.jcache.JCacheRegionFactory");
+            configuration.setProperty("hibernate.javax.cache.provider", 
+                    "org.ehcache.jsr107.EhcacheCachingProvider");
+            // Указываем путь к XML-файлу конфигурации Ehcache
+            configuration.setProperty("hibernate.javax.cache.uri", 
+                    "classpath:ehcache.xml");
 
             configuration.addAnnotatedClass(ClientEntity.class);
             configuration.addAnnotatedClass(ServiceEntity.class);

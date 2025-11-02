@@ -10,4 +10,6 @@ public interface ServiceRepository {
     List<ServiceEntity> findAllServices();
 
     ServiceEntity findCheapestServiceUsingCriteria();
+
+    ServiceEntity findById(Long id);
 }

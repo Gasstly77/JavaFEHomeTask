@@ -128,6 +128,16 @@ public class Main {
         System.out.println("\n=== Демонстрация новых методов ===");
         demonstrateNewMethods(serviceService, visitorService, employeeService, roomService);
 
+        // 6. Демонстрация запросов с кэшем и без
+        System.out.println("\n=== Демонстрация работы с кэшем ===");
+        Long firstServiceId = services.isEmpty() ? 1L : services.get(0).getId();
+        
+        // Сценарий а) - 3 запроса в БД (разные сессии, без кэша)
+        serviceService.demonstrateQueries(firstServiceId, false);
+        
+        // Сценарий б) - 2 запроса в БД (одна сессия, кэш 1-го уровня)
+        serviceService.demonstrateQueries(firstServiceId, true);
+
         visitorService.close();
         employeeService.close();
     }

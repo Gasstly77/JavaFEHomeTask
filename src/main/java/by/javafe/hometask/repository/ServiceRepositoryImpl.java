@@ -55,4 +55,11 @@ public class ServiceRepositoryImpl implements ServiceRepository{
             }
         }
     }
+
+    @Override
+    public ServiceEntity findById(Long id) {
+        try (org.hibernate.Session session = HibernateConfig.getSessionFactory().openSession()) {
+            return session.get(ServiceEntity.class, id);
+        }
+    }
 }
